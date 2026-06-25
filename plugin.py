@@ -1300,18 +1300,9 @@ class RssReaderPlugin(MaiBotPlugin):
             visible_text=visible,
             source_kind="plugin:rss-reader",
         )
-        await self.ctx.maisaka.proactive.trigger(
-            stream_id=stream_id,
-            intent=render_proactive_intent(
-                rss_cfg, count=count, feed_names=feed_names, stream_id=stream_id
-            ),
-            reason="rss_new_items",
-            metadata={
-                "count": count,
-                "feeds": sorted({item.feed_name or item.feed_url for item in new_items}),
-                "plugin": "rss-reader",
-            },
-        )
+        # v0.4.1: 不再调用 proactive.trigger()，避免在没有用户消息时
+        # Planner 被迫选 bot 自己的消息作为 reply 目标导致自回复。
+        # RSS 内容已注入 context，bot 在用户下次说话时会自然看到并结合回复。
 
     async def _refresh_stream_feeds(self, stream_id: str) -> None:
         if self._state is None:
